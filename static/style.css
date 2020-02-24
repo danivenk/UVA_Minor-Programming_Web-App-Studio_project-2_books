@@ -1,0 +1,79 @@
+/* Dani van Enk, 11823526 */
+/* predefining some mulitple used colors */
+/* alignment inheritance */
+h1, footer, .error {
+  text-align: center; }
+
+/* button border color inheritance */
+.row .btn-primary:active, .row .btn-primary:focus, .row .btn-primary, .row .btn-primary:hover {
+  border-color: #bb0050 !important; }
+
+/* button when clicked inheritance */
+.row .btn-primary:active, .row .btn-primary:focus {
+  background-color: #ca0057 !important;
+  box-shadow: 0 0 0 0.2rem #ff2281 !important; }
+
+/* container style */
+#container {
+  margin: 0 10% 0 10%;
+  box-shadow: 0 0 10px #444;
+  height: 100%;
+  padding: 0;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column; }
+
+/* nav style */
+nav {
+  background-color: #E06; }
+
+.nav-link:hover {
+  color: #FFF !important; }
+
+/* content style */
+.container {
+  flex: 1; }
+
+h1 {
+  margin: 3% 0; }
+
+h4 {
+  font-weight: bold;
+  font-size: 120%; }
+
+.row {
+  margin-top: 2%;
+  margin-bottom: 2%; }
+  .row .btn-primary {
+    background-color: #E06 !important;
+    float: right !important; }
+  .row .btn-primary:hover {
+    background-color: #d5005b !important; }
+
+.card {
+  font-size: 80%; }
+  .card .card-body {
+    padding: 1.25rem 0; }
+
+/* footer */
+footer {
+  left: 0;
+  bottom: 0;
+  width: 100%; }
+
+/* error page */
+.error img {
+  float: right;
+  position: relative;
+  height: 80%; }
+
+/* mobile style changes */
+@media screen and (max-device-width: 768px) {
+  #container {
+    margin: 0; }
+
+  .nav-link {
+    padding-top: 5%;
+    padding-bottom: 5%; } }
+
+/*# sourceMappingURL=style.css.map */

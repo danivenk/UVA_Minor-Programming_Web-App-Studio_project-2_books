@@ -1,0 +1,118 @@
+/* Dani van Enk, 11823526 */
+
+/* predefining some mulitple used colors */
+$main-color: #E06;
+
+
+/* alignment inheritance */
+%alignment {
+    text-align: center;
+}
+
+/* button border color inheritance */
+%button_border {
+    border-color: darken( $main-color, 10%) !important;
+}
+
+/* button when clicked inheritance */
+%click {
+    background-color: darken( $main-color, 7%) !important;
+    @extend %button_border;
+    box-shadow: 0 0 0 0.2rem lighten( $main-color, 10%) !important;
+}
+
+
+/* container style */
+#container {
+    margin: 0 10% 0 10%;
+    box-shadow: 0 0 10px #444;
+    height: 100%;
+    padding: 0;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+    /* nav style */
+    nav {
+        background-color: $main-color;
+    }
+
+    .nav-link:hover {
+        color: #FFF!important;
+    }
+
+    /* content style */
+    .container {
+        flex: 1;
+    }
+    
+    h1 {
+        @extend %alignment;
+        margin: 3% 0;
+    }
+
+    h4 {
+        font-weight: bold;
+        font-size: 120%;
+    }
+
+    .row {
+        margin-top: 2%;
+        margin-bottom: 2%;
+
+        .btn-primary {
+        background-color: $main-color !important;
+        float: right !important;
+        @extend %button_border
+        }
+
+        .btn-primary:hover {
+            background-color: darken( $main-color, 5%) !important;
+            @extend %button_border;
+        }
+
+        .btn-primary:active, .btn-primary:focus {
+            @extend %click;
+        }
+    }
+
+    .card {
+        font-size: 80%;
+
+        .card-body {
+            padding: 1.25rem 0;
+        }
+    }
+
+    /* footer */
+    footer {
+        @extend %alignment;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+    }
+
+
+    /* error page */
+    .error {
+        @extend %alignment;
+
+        img {
+            float: right;
+            position: relative;
+            height: 80%;
+        }
+    }
+
+/* mobile style changes */
+@media screen and (max-device-width: 768px) {
+    #container{
+        margin: 0;
+    }
+
+    .nav-link {
+        padding-top: 5%;
+        padding-bottom: 5%;
+    }
+}
