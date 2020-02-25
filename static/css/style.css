@@ -5,13 +5,19 @@ h1, footer, .error {
   text-align: center; }
 
 /* button border color inheritance */
-.row .btn-primary:active, .row .btn-primary:focus, .row .btn-primary, .row .btn-primary:hover {
+.login form .btn-primary:active, .row .btn-primary:active, .login form .btn-primary:focus, .row .btn-primary:focus, .login form .btn-primary, .row .btn-primary, .login form .btn-primary:hover, .row .btn-primary:hover {
   border-color: #bb0050 !important; }
 
 /* button when clicked inheritance */
-.row .btn-primary:active, .row .btn-primary:focus {
+.login form .btn-primary:active, .row .btn-primary:active, .login form .btn-primary:focus, .row .btn-primary:focus {
   background-color: #ca0057 !important;
   box-shadow: 0 0 0 0.2rem #ff2281 !important; }
+
+.login form .btn-primary, .row .btn-primary {
+  background-color: #E06 !important;
+  float: right !important; }
+.login form .btn-primary:hover, .row .btn-primary:hover {
+  background-color: #d5005b !important; }
 
 /* container style */
 #container {
@@ -30,6 +36,14 @@ nav {
 .nav-link:hover {
   color: #FFF !important; }
 
+.login {
+  right: 0;
+  position: absolute;
+  margin: 0 1% 0 0;
+  left: auto; }
+  .login form {
+    padding: 0 5%; }
+
 /* content style */
 .container {
   flex: 1; }
@@ -44,11 +58,6 @@ h4 {
 .row {
   margin-top: 2%;
   margin-bottom: 2%; }
-  .row .btn-primary {
-    background-color: #E06 !important;
-    float: right !important; }
-  .row .btn-primary:hover {
-    background-color: #d5005b !important; }
 
 .card {
   font-size: 80%; }
@@ -74,6 +83,12 @@ footer {
 
   .nav-link {
     padding-top: 5%;
-    padding-bottom: 5%; } }
+    padding-bottom: 5%; }
+
+  .login {
+    right: auto;
+    position: relative;
+    margin: 0;
+    left: 0; } }
 
 /*# sourceMappingURL=style.css.map */

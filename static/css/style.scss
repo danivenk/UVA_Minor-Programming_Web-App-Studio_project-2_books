@@ -21,6 +21,23 @@ $main-color: #E06;
     box-shadow: 0 0 0 0.2rem lighten( $main-color, 10%) !important;
 }
 
+%button {
+    .btn-primary {
+        background-color: $main-color !important;
+        float: right !important;
+        @extend %button_border
+        }
+
+        .btn-primary:hover {
+            background-color: darken( $main-color, 5%) !important;
+            @extend %button_border;
+        }
+
+        .btn-primary:active, .btn-primary:focus {
+            @extend %click;
+        }
+}
+
 
 /* container style */
 #container {
@@ -42,6 +59,19 @@ $main-color: #E06;
         color: #FFF!important;
     }
 
+    .login {
+        right: 0;
+        position: absolute;
+        margin: 0 1% 0 0;
+        left: auto;
+
+        form {
+            padding: 0 5%;
+            
+            @extend %button;
+        }
+    }
+
     /* content style */
     .container {
         flex: 1;
@@ -61,20 +91,7 @@ $main-color: #E06;
         margin-top: 2%;
         margin-bottom: 2%;
 
-        .btn-primary {
-        background-color: $main-color !important;
-        float: right !important;
-        @extend %button_border
-        }
-
-        .btn-primary:hover {
-            background-color: darken( $main-color, 5%) !important;
-            @extend %button_border;
-        }
-
-        .btn-primary:active, .btn-primary:focus {
-            @extend %click;
-        }
+        @extend %button;
     }
 
     .card {
@@ -114,5 +131,12 @@ $main-color: #E06;
     .nav-link {
         padding-top: 5%;
         padding-bottom: 5%;
+    }
+
+    .login {
+        right: auto;
+        position: relative;
+        margin: 0;
+        left: 0;
     }
 }
