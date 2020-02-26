@@ -1,10 +1,11 @@
 import os
 
-from flask import Flask, session, render_template
+from flask import Flask, session, render_template, request
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.exceptions import default_exceptions, HTTPException
+from functions import security
 
 app = Flask(__name__)
 
@@ -29,9 +30,17 @@ def index():
     return render_template("index.html", login=login_status)
 
 
-@app.route("/login")
+@app.route("/login", methods=["POST"])
 def login():
-    pass
+
+    # get values from submitted form
+    username = request.form.get("name")
+    password = request.form.get("mtype")
+
+    
+    # # make sure the required values are given else give 400 error
+    # if not name or not mtype:
+    #     abort(400, "not enough input to submit")
 
 
 @app.errorhandler(HTTPException)

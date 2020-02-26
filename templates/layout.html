@@ -31,11 +31,11 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                <div class="navbar-nav">
+                <div class="navbar-nav" id="nav_menu">
                     <a class="nav-item nav-link" href="#">Test</a>
-                    <a class="nav-item nav-link dropdown dropdown-toggle login" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"  aria-expanded="false">Login</a>
-                    <div class="dropdown-menu login">
-                        <form class="needs-validation" action="{{ url_for('index') }}" method="post" novalidate>
+                    <a class="nav-item nav-link dropdown dropdown-toggle login" id="drop_link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"  aria-expanded="false">Login</a>
+                    <div class="dropdown-menu login" id="drop_menu">
+                        <form class="needs-validation" action="{{ url_for('login') }}" method="post" novalidate>
                             <div class="form-group">
                                 <label for="username">Username: </label>
                                 <input type="email" class="form-control" name=username id="username" aria-describedby="emailHelp" placeholder="Username" required>
