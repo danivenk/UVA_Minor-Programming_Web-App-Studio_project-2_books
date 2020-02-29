@@ -7,8 +7,11 @@
 {% block content %}
     <h1>Register here</h1>
     <hr>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
 
-    <form class="needs-validation" action="{{ url_for('login') }}" method="post" novalidate>
+    <form class="needs-validation" action="{{ url_for('register') }}" method="post" novalidate>
         <div class="form-group">
             <label for="register_username">Username: </label>
             <input type="username" class="form-control" name="register_username" id="register_username" placeholder="Username" required>
@@ -30,6 +33,6 @@
                 Please enter your again password.
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Register</button>
     </form>
 {% endblock %}

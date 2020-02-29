@@ -25,20 +25,6 @@ db = scoped_session(sessionmaker(bind=engine))
 app.secret_key = os.urandom(16)
 
 
-def none():
-    # username = "testuser"
-    # password = security.hash_psswd("test123")
-    # name = "テスト"
-    # db.execute("CREATE TABLE accounts (id SERIAL PRIMARY KEY, "
-    #            "username VARCHAR NOT NULL, password VARCHAR NOT NULL, "
-    #            "name VARCHAR NOT NULL);")
-    # db.execute("INSERT INTO accounts (username, password, name) "
-    #            "VALUES (:username, :password, :name)",
-    #            {"username": username, "password": password, "name": name})
-    # db.commit()
-    pass
-
-
 @app.route("/")
 def index():
 
@@ -51,8 +37,35 @@ def index():
 
 @app.route("/register", methods=["POST", "GET"])
 def register():
-    if request.method == "GET":
-        return render_template("register.html")
+    if request.method == "POST":
+        username = request.form.get("register_username")
+        password = request.form.get("register_password")
+        rpassword = request.form.get("register_rpassword")
+
+        if password != rpassword:
+            return render_template("register.html", message="passwords weren't"
+                                   " the same...")
+
+        if not username or not password or not rpassword:
+            abort(400, "No username/password specified")
+
+        user = db.execute("SELECT * FROM accounts "
+                          "WHERE username=:username",
+                          {"username": username}).fetchall()
+
+        if len(user) == 1:
+            abort(400, "User already registered")
+
+        password = security.hash_psswd(password)
+
+        db.execute("INSERT INTO accounts (username, password) "
+                   "VALUES (:username, :password)",
+                   {"username": username, "password": password})
+        db.commit()
+
+        return redirect("/", 307)
+
+    return render_template("register.html")
 
 
 @app.route("/login", methods=["POST"])
@@ -67,7 +80,6 @@ def login():
     # make sure the required values are given else give 400 error
     if not username or not password:
         abort(400, "No username/password specified")
-    print(len(user))
     if len(user) != 1:
         abort(401, "Login failed")
         return redirect("/", 307)
