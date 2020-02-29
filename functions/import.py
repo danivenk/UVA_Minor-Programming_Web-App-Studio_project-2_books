@@ -16,12 +16,14 @@ def main():
     engine = create_engine(os.getenv("DATABASE_URL"))
     db = scoped_session(sessionmaker(bind=engine))
 
+    db.execute("CREATE TABLE accounts (id SERIAL PRIMARY KEY, "
+               "username VARCHAR NOT NULL, password VARCHAR NOT NULL);")
     db.execute("CREATE TABLE books (id SERIAL PRIMARY KEY, "
                "title VARCHAR NOT NULL, author VARCHAR NOT NULL, "
                "year INTEGER NOT NULL, isbn VARCHAR NOT NULL, "
                "review_count INTEGER, average_score DECIMAL);")
     db.execute("CREATE TABLE reviews (id SERIAL PRIMARY KEY, "
-               "username VARCHAR NOT NULL, rating DECIMAL, "
+               "user_id INTEGER REFERENCES accounts, rating DECIMAL, "
                "text VARCHAR NOT NULL, book_id INTEGER REFERENCES books);")
 
     f = open("../books.csv")

@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block content %}
+    <h1>Register here</h1>
+    <hr>
+
+    <form class="needs-validation" action="{{ url_for('login') }}" method="post" novalidate>
+        <div class="form-group">
+            <label for="register_username">Username: </label>
+            <input type="username" class="form-control" name="register_username" id="register_username" placeholder="Username" required>
+            <div class="invalid-feedback">
+                Please enter a username.
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="register_password">Password</label>
+            <input type="password" name="register_password" class="form-control" id="register_password" placeholder="Password" required>
+            <div class="invalid-feedback">
+                Please enter your password.
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="register_rpassword">Retype Password</label>
+            <input type="password" name="register_rpassword" class="form-control" id="register_rpassword" placeholder="Retype Password" required>
+            <div class="invalid-feedback">
+                Please enter your again password.
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}

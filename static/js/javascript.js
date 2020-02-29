@@ -1,7 +1,7 @@
 // init() executes after DOMContent has been loaded
 function init() {
     // find form and validation items in the page
-    var form = document.querySelector(".needs-validation");
+    var form = document.querySelectorAll(".needs-validation");
     var validation_items = document.querySelectorAll(".form-control");
     var dropdown_menu = document.querySelector("#drop_menu");
     var dropdown_link = document.querySelector("#drop_link");

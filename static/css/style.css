@@ -43,6 +43,8 @@ nav {
   left: auto; }
   .login form {
     padding: 0 5%; }
+  .login a {
+    display: contents; }
 
 /* content style */
 .container {

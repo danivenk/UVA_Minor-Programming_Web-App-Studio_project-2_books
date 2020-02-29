@@ -67,9 +67,14 @@ $main-color: #E06;
 
         form {
             padding: 0 5%;
-            
+ 
             @extend %button;
         }
+        
+        a {
+            display: contents;
+        }
+
     }
 
     /* content style */

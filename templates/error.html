@@ -1,16 +1,9 @@
-<!--
-error.html creates the error page with a message
-Dani van Enk, 11823526
--->
-
 {% extends "layout.html" %}
 
-{% block main %}
+{% block content %}
+    <h1>{{ header }}</h1>
+    <hr>
 
-    <!-- http://getbootstrap.com/docs/4.1/components/alerts/ -->
-    <div class="alert alert-danger" role="alert">
-        <h4 class="alert-heading">Error</h4>
-        <p>{{ message }}</p>
-    </div>
+    <p>{{ message }}</p>
 
 {% endblock %}
