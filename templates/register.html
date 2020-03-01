@@ -1,16 +1,29 @@
+<!--
+    register page
+    uses the message parameter for feedback
+    it extends from layout.html
+
+    Dani van Enk, 11823526
+-->
+
 {% extends "layout.html" %}
 
+<!-- title of the page -->
 {% block title %}
     Register
 {% endblock %}
 
+<!-- content of the page -->
 {% block content %}
     <h1>Register here</h1>
     <hr>
+
+    <!-- feedback for if the passwords arent the same -->
     {% if message %}
         <p>{{ message }}</p>
     {% endif %}
 
+    <!-- register form, enter username/password and retype password -->
     <form class="needs-validation" action="{{ url_for('register') }}" method="post" novalidate>
         <div class="form-group">
             <label for="register_username">Username: </label>
