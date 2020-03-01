@@ -26,6 +26,54 @@ db = scoped_session(sessionmaker(bind=engine))
 app.secret_key = os.urandom(16)
 
 
+@app.before_request
+def setup_urls():
+    """
+    create a dictionary for the navbar items
+    """
+
+    # get all routes in the app
+    urls = app.url_map.iter_rules()
+
+    # create an empty dictionary
+    url_list = dict()
+
+    # iterate over all routes in the app
+    for url in urls:
+
+        # filter for routes with a "GET" method
+        if "GET" in url.get_empty_kwargs()["methods"]:
+
+            # get the endpoint of the route
+            endpoint = url.get_empty_kwargs()["endpoint"]
+
+            # define the routes excluded and only available if logged on
+            forbidden = ["log", "static", "register"]
+            login_req = ["search"]
+
+            # exlcude items in forbidden
+            if any(item in endpoint for item in forbidden):
+                pass
+
+            # add index as "Home"
+            elif "index" in endpoint:
+                url_list[endpoint] = ["Home", None]
+
+            # add items where login is required
+            elif any(item in endpoint for item in login_req):
+                url_list[endpoint] = [endpoint.capitalize(), True]
+
+            # add items the rest
+            else:
+                url_list[endpoint] = [endpoint.capitalize(), None]
+
+    # sort dictionary by key
+    url_list = dict(sorted(url_list.items(), key=lambda x: x[0]))
+
+    # add url_list to session
+    session["urls"] = url_list
+
+
 @app.route("/", methods=["GET"])
 def index():
     """
@@ -37,6 +85,8 @@ def index():
     returns the homepage with parameters if logged on
     """
 
+    url_list = session.get("urls")
+
     # check if request is a "GET" request
     if request.method == "GET":
 
@@ -46,10 +96,11 @@ def index():
             # get username if so and render
             user = session.get("username")
 
-            return render_template("index.html", login=True, user=user)
+            return render_template("index.html", login=True, user=user,
+                                   urls=url_list)
         else:
 
-            return render_template("index.html")
+            return render_template("index.html", urls=url_list)
 
     # abort using a 405 HTTPException
     abort(405)
@@ -70,6 +121,8 @@ def register():
         was successfull it redirects (303) to "/".
     """
 
+    url_list = session.get("urls")
+
     # check if request was a "POST" or a "GET" request
     if request.method == "POST":
 
@@ -81,7 +134,7 @@ def register():
         # if the given passwords aren't the same rerender the template
         if password != rpassword:
             return render_template("register.html", message="passwords weren't"
-                                   " the same...")
+                                   " the same...", urls=url_list)
 
         # if no username/password/retype password were given abort (400)
         if not username or not password or not rpassword:
@@ -113,7 +166,7 @@ def register():
 
     elif request.method == "GET":
 
-        return render_template("register.html")
+        return render_template("register.html", urls=url_list)
 
     # abort using a 405 HTTPException
     abort(405)
@@ -199,6 +252,30 @@ def logout():
         session.pop("username", None)
 
         return redirect("/", code=303)
+
+    # abort using a 405 HTTPException
+    abort(405)
+
+
+@app.route("/search", methods=["GET"])
+def search():
+
+    url_list = session.get("urls")
+
+    # check if request is a "GET" request
+    if request.method == "GET":
+
+        # check if someone is logged on
+        if "username" in session:
+
+            # get username if so and render
+            user = session.get("username")
+
+            return render_template("index.html", login=True, user=user,
+                                   urls=url_list)
+        else:
+
+            abort(403)
 
     # abort using a 405 HTTPException
     abort(405)

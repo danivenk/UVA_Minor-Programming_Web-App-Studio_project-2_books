@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="ja-jp">
+<html lang="en-us">
 
 <head>
     <!-- declaration of the page title, charset -->
@@ -32,15 +32,22 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav" id="nav_menu">
-                    <a class="nav-item nav-link" href="#">Test</a>
                     {% if login %}
+                        {% for item_key in urls %}
+                            <a class="nav-item nav-link" href="{{ url_for(item_key) }}">{{ urls[item_key][0] }}</a>
+                        {% endfor %}
                         <!-- greet user and show login button if logged on -->
                         <div class="login">
                             <div class="nav-item navbar-text">Hi there, {{ user }} |</div>
-                            <a class="nav-item nav-link" href="{{ url_for('logout') }}" role="button">Logout</a>
-                        </div>
+                                <a class="nav-item nav-link" href="{{ url_for('logout') }}" role="button">Logout</a>
+                            </div>
                         </div>
                     {% else %}
+                        {% for item_key in urls %}
+                            {% if not urls[item_key][1] %}
+                                <a class="nav-item nav-link" href="{{ url_for(item_key) }}">{{ urls[item_key][0] }}</a>
+                            {% endif %}
+                        {% endfor %}
                         <!-- show login screen in dropdown if not logged in -->
                         <a class="nav-item nav-link dropdown dropdown-toggle login" id="drop_link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Login</a>
                         <div class="dropdown-menu login" id="drop_menu">

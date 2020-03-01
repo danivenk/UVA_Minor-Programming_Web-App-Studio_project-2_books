@@ -2,3 +2,6 @@
 __pycache__
 flask_session
 test.py
+*.sql
+*.pyc
+*.__wz_cache
