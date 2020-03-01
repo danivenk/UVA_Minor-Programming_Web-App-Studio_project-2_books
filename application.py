@@ -1,13 +1,18 @@
 import os
 
-from flask import Flask, session, render_template, request, abort, redirect
+from flask import Flask, session, render_template, request, abort, redirect, \
+                  jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.exceptions import default_exceptions, HTTPException
 from functions import security
 
+# create flask app
 app = Flask(__name__)
+
+# make sure the json keys aren't sorted
+app.config['JSON_SORT_KEYS'] = False
 
 # Check for environment variable
 if not os.getenv("DATABASE_URL"):
@@ -276,6 +281,41 @@ def search():
         else:
 
             abort(403)
+
+    # abort using a 405 HTTPException
+    abort(405)
+
+
+@app.route("/api/<isbn>", methods=["GET"])
+def api(isbn):
+    """
+    creates the api for the web application
+
+    aborts if:
+        - the resquest is anything else than a "GET" request
+        - somehow there are more than one entry of 1 isbn (401)
+        - isbn not found in database (404)
+
+
+    returns a json version of the book data
+    """
+
+    # check if request is a "GET" request
+    if request.method == "GET":
+
+        book = db.execute("SELECT * FROM books WHERE isbn=:isbn",
+                          {"isbn": isbn}).fetchall()
+
+        if len(book) >= 1:
+            abort(401)
+        elif len(book) == 0:
+            abort(404)
+
+        book = book[0]
+
+        return jsonify(title=book.title, author=book.author, year=book.year,
+                       isbn=book.isbn, review_count=book.review_count,
+                       average_score=book.average_score)
 
     # abort using a 405 HTTPException
     abort(405)
