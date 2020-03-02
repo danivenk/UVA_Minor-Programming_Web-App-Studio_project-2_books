@@ -5,3 +5,4 @@ SQLAlchemy
 requests
 werkzeug
 flask-sqlalchemy
+json

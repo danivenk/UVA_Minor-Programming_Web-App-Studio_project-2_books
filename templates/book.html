@@ -1,0 +1,21 @@
+<!--
+    book page
+    it extends from layout.html
+
+    Dani van Enk, 11823526
+-->
+
+{% extends "layout.html" %}
+
+<!-- title of the page -->
+{% block title %}
+    {{ book.title }}
+{% endblock %}
+
+<!-- content of the page -->
+{% block content %}
+    <h1>{{ book.title }}</h1>
+    <div>Author: {{ book.author }}, ({{ book.year }})</div>
+    <div>ISBN: {{ book.isbn }}</div>
+    <hr>
+{% endblock %}

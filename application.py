@@ -1,4 +1,6 @@
 import os
+import requests
+import json
 
 from flask import Flask, session, render_template, request, abort, redirect, \
                   jsonify
@@ -53,7 +55,7 @@ def setup_urls():
             endpoint = url.get_empty_kwargs()["endpoint"]
 
             # define the routes excluded and only available if logged on
-            forbidden = ["log", "static", "register"]
+            forbidden = ["log", "static", "register", "api", "book"]
             login_req = ["search"]
 
             # exlcude items in forbidden
@@ -286,6 +288,60 @@ def search():
     abort(405)
 
 
+@app.route("/<isbn>", methods=["GET"])
+def book(isbn):
+
+    url_list = session.get("urls")
+
+    # check if request is a "GET" request
+    if request.method == "GET":
+
+        # check if someone is logged on
+        if "username" in session:
+
+            # get username if so and render
+            user = session.get("username")
+
+            books = db.execute("SELECT * FROM books WHERE isbn=:isbn",
+                               {"isbn": isbn}).fetchall()
+            reviews = db.execute("SELECT * FROM reviews JOIN books ON "
+                                 "reviews.book_id = books.id WHERE isbn=:isbn",
+                                 {"isbn": isbn}).fetchall()
+            users = db.execute("SELECT username FROM accounts").fetchall()
+
+            gr_data = requests.get("https://www.goodreads.com/book/"
+                                   "review_counts.json?"
+                                   f"key=4cWZI3ifMz0RSj1NFaYiBQ&isbns={isbn}")
+
+            try:
+                data = json.loads(gr_data.text)
+
+                gr_ar = data["books"][0]["average_rating"]
+                gr_nor = data["books"][0]["ratings_count"]
+
+                goodreads = [gr_ar, gr_nor]
+            except json.decoder.JSONDecodeError:
+                goodreads = []
+
+            if len(books) > 1:
+                abort(401)
+            elif len(books) == 0:
+                abort(404)
+
+            book = books[0]
+
+            return render_template("book.html", book=book, reviews=reviews,
+                                   users=users, login=True, user=user,
+                                   urls=url_list, goodreads=goodreads)
+
+        else:
+
+            abort(403)
+
+    # abort using a 405 HTTPException
+    abort(405)
+
+
 @app.route("/api/<isbn>", methods=["GET"])
 def api(isbn):
     """
@@ -303,15 +359,15 @@ def api(isbn):
     # check if request is a "GET" request
     if request.method == "GET":
 
-        book = db.execute("SELECT * FROM books WHERE isbn=:isbn",
-                          {"isbn": isbn}).fetchall()
+        books = db.execute("SELECT * FROM books WHERE isbn=:isbn",
+                           {"isbn": isbn}).fetchall()
 
-        if len(book) >= 1:
+        if len(books) > 1:
             abort(401)
-        elif len(book) == 0:
+        elif len(books) == 0:
             abort(404)
 
-        book = book[0]
+        book = books[0]
 
         return jsonify(title=book.title, author=book.author, year=book.year,
                        isbn=book.isbn, review_count=book.review_count,
@@ -334,11 +390,25 @@ def errorhandler(error):
         from UVA Mprog Programming 2 Module 10 - Web
     """
 
+    url_list = session.get("urls")
+
     # split the error into the header and message
     error_message = str(error).split(":")
 
-    return render_template("error.html", header=error_message[0],
-                           message=error_message[1]), error.code
+    # check if someone is logged on
+    if "username" in session:
+
+        # get username if so and render
+        user = session.get("username")
+
+        return render_template("error.html", header=error_message[0],
+                               message=error_message[1], login=True, user=user,
+                               urls=url_list), error.code
+    else:
+
+        return render_template("error.html", header=error_message[0],
+                               message=error_message[1], urls=url_list), \
+                               error.code
 
 
 # https://github.com/pallets/flask/pull/2314
