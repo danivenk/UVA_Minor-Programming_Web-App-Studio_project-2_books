@@ -1,0 +1,45 @@
+<!--
+    book page
+    it extends from layout.html
+
+    Dani van Enk, 11823526
+-->
+
+{% extends "layout.html" %}
+
+<!-- title of the page -->
+{% block title %}
+    search
+{% endblock %}
+
+<!-- content of the page -->
+{% block content %}
+    <h1>Search</h1>
+    <!-- register form, enter username/password and retype password -->
+    <form action="{{ url_for('search') }}" method="get" novalidate>
+        <div class="form-row col-sm-12">
+            {% if search_query == None %}
+                <input type="search" class="form-control col-md-11 col-8" name="search" id="search" placeholder="write your search query" value="{{ search_query }}">
+            {% else %}
+                <input type="search" class="form-control col-md-11 col-8" name="search" id="search" placeholder="write your search query">
+            {% endif %}
+            <button type="submit" class="btn btn-primary col-md-1 col-4">Search</button>
+        </div>
+    </form>
+    <hr>
+
+    <h4>Search results</h4>
+    <p>({{ results | length }} results found)</p>
+    <div class="row">
+        {% for result in results %}
+        <div class="col-md-4 card card-body">
+            <h6 class="card-title">{{ result.title }}</h6>
+            <p class="card-text">
+                {{ result.author}} ({{ result.year }})
+            </p>
+            <a href="{{ url_for('book', isbn=result.isbn) }}" class="card-link btn btn-primary">Book page</a>
+        </div>
+        {% endfor %}
+    </div>
+    
+{% endblock %}

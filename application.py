@@ -1,6 +1,7 @@
 import os
 import requests
 import json
+import re
 
 from flask import Flask, session, render_template, request, abort, redirect, \
                   jsonify, escape
@@ -232,7 +233,7 @@ def login():
             # abort using a 401 HTTPException
             abort(401, "Login failed")
 
-        return redirect("/", code=303)
+        return redirect("/search", code=303)
 
     # abort using a 405 HTTPException
     abort(405)
@@ -278,8 +279,23 @@ def search():
             # get username if so and render
             user = session.get("username")
 
-            return render_template("index.html", login=True, user=user,
-                                   urls=url_list)
+            search_query = escape(request.args.get("search"))
+
+            search = re.split('\W', search_query)
+
+            results = []
+
+            for query in search:
+                db_res = db.execute("SELECT * FROM books WHERE (title ILIKE "
+                                    f"'%{query}%' or author ILIKE '%{query}%'"
+                                    f" or isbn ILIKE '%{query}%')")
+                for db_result in db_res:
+                    if db_result not in results:
+                        results.append(db_result)
+
+            return render_template("search.html", login=True, user=user,
+                                   urls=url_list, search_query=search_query,
+                                   results=results)
         else:
 
             abort(403)
@@ -322,8 +338,8 @@ def book(isbn):
 
                 goodreads = [gr_ar, gr_nor]
 
-                if (item < 0 for item in goodreads):
-                    goodreads = 0
+                if (float(item) < 0 for item in goodreads):
+                    goodreads = []
             except (json.decoder.JSONDecodeError, ConnectionError):
                 goodreads = None
 
@@ -357,6 +373,14 @@ def book(isbn):
 
                 abort(403, "You can't submit a review which is not"
                       "under your name.")
+
+            user_check = db.execute("SELECT * FROM reviews WHERE user_id=("
+                                    "SELECT id FROM accounts WHERE username="
+                                    ":username)",
+                                    {"username": username}).fetchall()
+
+            if len(user_check) != 0:
+                abort(403, "You can't review more than once.")
 
             db.execute("INSERT INTO reviews (user_id, rating, text, book_id) "
                        "VALUES ((SELECT id from accounts where "
