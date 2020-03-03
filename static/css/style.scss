@@ -80,6 +80,10 @@ $main-color: #E06;
     /* content style */
     .container {
         flex: 1;
+
+        form {
+            @extend %button;
+        }
     }
     
     h1 {
@@ -104,6 +108,10 @@ $main-color: #E06;
 
         .card-body {
             padding: 1.25rem 0;
+        }
+
+        .card-text {
+            white-space: pre-line;
         }
     }
 
@@ -143,5 +151,9 @@ $main-color: #E06;
         position: relative;
         margin: 0;
         left: 0;
+    }
+
+    footer {
+        margin: 5% 0 2% 0;
     }
 }

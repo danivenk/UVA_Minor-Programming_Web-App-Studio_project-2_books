@@ -3,7 +3,7 @@ import requests
 import json
 
 from flask import Flask, session, render_template, request, abort, redirect, \
-                  jsonify
+                  jsonify, escape
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -134,9 +134,9 @@ def register():
     if request.method == "POST":
 
         # get all values from the submitted form
-        username = request.form.get("register_username")
-        password = request.form.get("register_password")
-        rpassword = request.form.get("register_rpassword")
+        username = escape(request.form.get("register_username"))
+        password = escape(request.form.get("register_password"))
+        rpassword = escape(request.form.get("register_rpassword"))
 
         # if the given passwords aren't the same rerender the template
         if password != rpassword:
@@ -200,8 +200,8 @@ def login():
     if request.method == "POST":
 
         # get values from submitted form
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = escape(request.form.get("username"))
+        password = escape(request.form.get("password"))
 
         # find user in database
         user = db.execute("SELECT password FROM accounts "
@@ -288,7 +288,7 @@ def search():
     abort(405)
 
 
-@app.route("/<isbn>", methods=["GET"])
+@app.route("/<isbn>", methods=["GET", "POST"])
 def book(isbn):
 
     url_list = session.get("urls")
@@ -309,22 +309,26 @@ def book(isbn):
                                  {"isbn": isbn}).fetchall()
             users = db.execute("SELECT username FROM accounts").fetchall()
 
-            gr_data = requests.get("https://www.goodreads.com/book/"
-                                   "review_counts.json?"
-                                   f"key=4cWZI3ifMz0RSj1NFaYiBQ&isbns={isbn}")
-
             try:
+                gr_data = requests.get("https://www.goodreads.com/book/"
+                                       "review_counts.json?"
+                                       "key=4cWZI3ifMz0RSj1NFaYiBQ"
+                                       f"&isbns={isbn}")
+
                 data = json.loads(gr_data.text)
 
                 gr_ar = data["books"][0]["average_rating"]
                 gr_nor = data["books"][0]["ratings_count"]
 
                 goodreads = [gr_ar, gr_nor]
-            except json.decoder.JSONDecodeError:
-                goodreads = []
+
+                if (item < 0 for item in goodreads):
+                    goodreads = 0
+            except (json.decoder.JSONDecodeError, ConnectionError):
+                goodreads = None
 
             if len(books) > 1:
-                abort(401)
+                abort(400)
             elif len(books) == 0:
                 abort(404)
 
@@ -337,6 +341,40 @@ def book(isbn):
         else:
 
             abort(403)
+    elif request.method == "POST":
+
+        # check if someone is logged on
+        if "username" in session:
+
+            # get username if so and render
+            user_name = session.get("username")
+
+            username = escape(request.form.get("review_username"))
+            rating = escape(request.form.get("rating"))
+            review_text = escape(request.form.get("review"))
+
+            if user_name != username:
+
+                abort(403, "You can't submit a review which is not"
+                      "under your name.")
+
+            db.execute("INSERT INTO reviews (user_id, rating, text, book_id) "
+                       "VALUES ((SELECT id from accounts where "
+                       "username=:username), :rating, :text, (SELECT id from "
+                       "books where isbn=:isbn))",
+                       {"username": username, "rating": rating,
+                        "text": review_text, "isbn": isbn})
+
+            db.execute("UPDATE books SET (review_count, average_score)="
+                       "(SELECT COUNT(*), AVG(rating) FROM reviews "
+                       "WHERE book_id=(SELECT id FROM books WHERE isbn=:isbn))"
+                       " WHERE isbn=:isbn", {"isbn": isbn})
+
+            db.commit()
+
+            return redirect(f"/{isbn}", 303)
+
+        abort(403)
 
     # abort using a 405 HTTPException
     abort(405)
@@ -371,7 +409,7 @@ def api(isbn):
 
         return jsonify(title=book.title, author=book.author, year=book.year,
                        isbn=book.isbn, review_count=book.review_count,
-                       average_score=book.average_score)
+                       average_score=f"{book.average_score:.1f}")
 
     # abort using a 405 HTTPException
     abort(405)

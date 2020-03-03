@@ -5,18 +5,18 @@ h1, footer, .error {
   text-align: center; }
 
 /* button border color inheritance */
-.login form .btn-primary:active, .row .btn-primary:active, .login form .btn-primary:focus, .row .btn-primary:focus, .login form .btn-primary, .row .btn-primary, .login form .btn-primary:hover, .row .btn-primary:hover {
+.login form .btn-primary:active, .container form .btn-primary:active, .row .btn-primary:active, .login form .btn-primary:focus, .container form .btn-primary:focus, .row .btn-primary:focus, .login form .btn-primary, .container form .btn-primary, .row .btn-primary, .login form .btn-primary:hover, .container form .btn-primary:hover, .row .btn-primary:hover {
   border-color: #bb0050 !important; }
 
 /* button when clicked inheritance */
-.login form .btn-primary:active, .row .btn-primary:active, .login form .btn-primary:focus, .row .btn-primary:focus {
+.login form .btn-primary:active, .container form .btn-primary:active, .row .btn-primary:active, .login form .btn-primary:focus, .container form .btn-primary:focus, .row .btn-primary:focus {
   background-color: #ca0057 !important;
   box-shadow: 0 0 0 0.2rem #ff2281 !important; }
 
-.login form .btn-primary, .row .btn-primary {
+.login form .btn-primary, .container form .btn-primary, .row .btn-primary {
   background-color: #E06 !important;
   float: right !important; }
-.login form .btn-primary:hover, .row .btn-primary:hover {
+.login form .btn-primary:hover, .container form .btn-primary:hover, .row .btn-primary:hover {
   background-color: #d5005b !important; }
 
 /* container style */
@@ -65,6 +65,8 @@ h4 {
   font-size: 80%; }
   .card .card-body {
     padding: 1.25rem 0; }
+  .card .card-text {
+    white-space: pre-line; }
 
 /* footer */
 footer {
@@ -91,6 +93,9 @@ footer {
     right: auto;
     position: relative;
     margin: 0;
-    left: 0; } }
+    left: 0; }
+
+  footer {
+    margin: 5% 0 2% 0; } }
 
 /*# sourceMappingURL=style.css.map */

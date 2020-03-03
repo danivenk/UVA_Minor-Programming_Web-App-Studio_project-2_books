@@ -29,8 +29,9 @@ def main():
                "year INTEGER NOT NULL, isbn VARCHAR NOT NULL, "
                "review_count INTEGER, average_score DECIMAL);")
     db.execute("CREATE TABLE reviews (id SERIAL PRIMARY KEY, "
-               "user_id INTEGER REFERENCES accounts, rating DECIMAL, "
-               "text VARCHAR NOT NULL, book_id INTEGER REFERENCES books);")
+               "user_id INTEGER REFERENCES accounts NOT NULL, rating DECIMAL, "
+               "text VARCHAR NOT NULL, "
+               "book_id INTEGER REFERENCES books NOT NULL);")
 
     # open books.csv and make a csv read object
     f = open("../books.csv")
