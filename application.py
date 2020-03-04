@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+version: python 3+
+application.py defines the flask app
+Dani van Enk, 11823526
+
+references:
+    https://cs50.harvard.edu/web/notes/3/
+"""
+
+# used imports
 import os
 import requests
 import json
@@ -59,20 +71,19 @@ def setup_urls():
             forbidden = ["log", "static", "register", "api", "book"]
             login_req = ["search"]
 
-            # exlcude items in forbidden
-            if any(item in endpoint for item in forbidden):
-                pass
+            # check if allowed
+            allowed = not any(item in endpoint for item in forbidden)
 
             # add index as "Home"
-            elif "index" in endpoint:
+            if "index" in endpoint and allowed:
                 url_list[endpoint] = ["Home", None]
 
             # add items where login is required
-            elif any(item in endpoint for item in login_req):
+            elif any(item in endpoint for item in login_req) and allowed:
                 url_list[endpoint] = [endpoint.capitalize(), True]
 
             # add items the rest
-            else:
+            elif allowed:
                 url_list[endpoint] = [endpoint.capitalize(), None]
 
     # sort dictionary by key
@@ -88,26 +99,25 @@ def index():
     renders the homepage
 
     aborts if:
-        - request is anything else than a "GET" request
+        - request is anything else than a "GET" request (405)
 
     returns the homepage with parameters if logged on
     """
 
     url_list = session.get("urls")
 
+    # check if someone is logged on
+    if "username" in session:
+
+        # get username if so and render
+        user = session.get("username")
+
     # check if request is a "GET" request
     if request.method == "GET":
-
-        # check if someone is logged on
-        if "username" in session:
-
-            # get username if so and render
-            user = session.get("username")
-
+        if user:
             return render_template("index.html", login=True, user=user,
                                    urls=url_list)
         else:
-
             return render_template("index.html", urls=url_list)
 
     # abort using a 405 HTTPException
@@ -122,7 +132,7 @@ def register():
     aborts if:
         - no username/password/retype password is given (400)
         - user already registered (400)
-        - request is anything else than "POST" or "GET"
+        - request is anything else than "POST" or "GET" (405)
 
     returns the register form again if the retype password and password
         weren't the same or the request was a "GET" request. If registration
@@ -189,7 +199,7 @@ def login():
         - no username/password is specified (400)
         - the database gives more or less than 1 account back (401)
         - the credentials are invalid (401)
-        - method is anthing else than POST
+        - method is anthing else than POST (405)
 
     returns a redirect (303) to "/"
 
@@ -245,7 +255,7 @@ def logout():
     logs out
 
     aborts if:
-        - method is anything else than GET
+        - method is anything else than GET (405)
 
     returns a redirect (303) to "/"
 
@@ -267,38 +277,62 @@ def logout():
 
 @app.route("/search", methods=["GET"])
 def search():
+    """
+    searches the query in the database and shows the result
 
+    aborts if:
+        - post is something else than a "GET" request (405)
+        - if not logged on (403)
+
+    it returns the search page
+    """
+
+    # get the url list from the session
     url_list = session.get("urls")
 
-    # check if request is a "GET" request
-    if request.method == "GET":
+    # check if someone is logged on
+    if "username" in session:
 
-        # check if someone is logged on
-        if "username" in session:
+        # get username if so and render
+        user = session.get("username")
 
-            # get username if so and render
-            user = session.get("username")
+    # check if request is a "GET" request and if user is logged on
+    if request.method == "GET" and user:
 
-            search_query = escape(request.args.get("search"))
+        # get the search query
+        search_query = str(request.args.get("search"))
 
-            search = re.split('\W', search_query)
+        # split the query into single words (escape the query)
+        search = re.split(r'\W+', search_query)
 
-            results = []
+        # predefine an empty list for the results
+        results = []
 
-            for query in search:
+        # search each word in the database
+        for query in search:
+
+            # exclude any escaped words
+            if query:
+
+                # search in the columns of the book database for the query
                 db_res = db.execute("SELECT * FROM books WHERE (title ILIKE "
                                     f"'%{query}%' or author ILIKE '%{query}%'"
-                                    f" or isbn ILIKE '%{query}%')")
+                                    f" or isbn ILIKE '%{query}%')").fetchall()
+
+                # add all items to the result list
                 for db_result in db_res:
+
+                    # make sure noe doubles added to the results
                     if db_result not in results:
                         results.append(db_result)
 
-            return render_template("search.html", login=True, user=user,
-                                   urls=url_list, search_query=search_query,
-                                   results=results)
-        else:
+        return render_template("search.html", login=True, user=user,
+                               urls=url_list, search_query=search_query,
+                               results=results)
 
-            abort(403)
+    # abort if not logged on
+    elif not user:
+        abort(403)
 
     # abort using a 405 HTTPException
     abort(405)
@@ -309,54 +343,70 @@ def book(isbn):
 
     url_list = session.get("urls")
 
-    # check if request is a "GET" request
-    if request.method == "GET":
+    # check if someone is logged on
+    if "username" in session:
 
-        # check if someone is logged on
-        if "username" in session:
+        # get username if so and render
+        user = session.get("username")
 
-            # get username if so and render
-            user = session.get("username")
+    # check if request is a "GET" request and user logged on
+    if request.method == "GET" and user:
 
-            books = db.execute("SELECT * FROM books WHERE isbn=:isbn",
-                               {"isbn": isbn}).fetchall()
-            reviews = db.execute("SELECT * FROM reviews JOIN books ON "
-                                 "reviews.book_id = books.id WHERE isbn=:isbn",
-                                 {"isbn": isbn}).fetchall()
-            users = db.execute("SELECT username FROM accounts").fetchall()
+        # get books/reviews for this isbn and all users
+        books = db.execute("SELECT * FROM books WHERE isbn=:isbn",
+                           {"isbn": isbn}).fetchall()
+        reviews = db.execute("SELECT * FROM reviews JOIN books ON "
+                             "reviews.book_id = books.id WHERE isbn=:isbn",
+                             {"isbn": isbn}).fetchall()
+        users = db.execute("SELECT username FROM accounts").fetchall()
 
-            try:
-                gr_data = requests.get("https://www.goodreads.com/book/"
-                                       "review_counts.json?"
-                                       "key=4cWZI3ifMz0RSj1NFaYiBQ"
-                                       f"&isbns={isbn}")
+        # define url for the goodreads api with this isbn
+        URL = "https://www.goodreads.com/book/review_counts.json?key=" \
+            f"4cWZI3ifMz0RSj1NFaYiBQ&isbns={isbn}"
 
-                data = json.loads(gr_data.text)
+        # if there can be made a connection to the goodreads api get te values
+        if requests.get(URL).status_code == 200:
 
-                gr_ar = data["books"][0]["average_rating"]
-                gr_nor = data["books"][0]["ratings_count"]
+            # get the goodreads api values
+            gr_data = requests.get(URL)
 
-                goodreads = [gr_ar, gr_nor]
+            # convert the json data to dictionary
+            data = json.loads(gr_data.text)
 
-                if (float(item) < 0 for item in goodreads):
-                    goodreads = []
-            except (json.decoder.JSONDecodeError, ConnectionError):
+            # get the average_rating and ratings_count
+            gr_ar = data["books"][0]["average_rating"]
+            gr_nor = data["books"][0]["ratings_count"]
+
+            # make a list with those values
+            goodreads = [gr_ar, gr_nor]
+
+            # if the rating or count is 0 give goodreads the value none instead
+            if gr_ar == "0.0" or gr_nor == 0:
                 goodreads = None
 
-            if len(books) > 1:
-                abort(400)
-            elif len(books) == 0:
-                abort(404)
-
-            book = books[0]
-
-            return render_template("book.html", book=book, reviews=reviews,
-                                   users=users, login=True, user=user,
-                                   urls=url_list, goodreads=goodreads)
-
+        # if no connection could be made, give goodreads a null value
         else:
+            goodreads = None
 
-            abort(403)
+        # if there are more than 1 book for the same isbn abort
+        if len(books) > 1:
+            abort(400)
+        # 404 abort if none are found
+        elif len(books) == 0:
+            abort(404)
+
+        # get first item in the books list (got list from database fetch)
+        book = books[0]
+
+        return render_template("book.html", book=book, reviews=reviews,
+                               users=users, login=True, user=user,
+                               urls=url_list, goodreads=goodreads)
+
+    # if not logged on abort
+    elif not user:
+        abort(403)
+
+    # check if request is a "POST" request
     elif request.method == "POST":
 
         # check if someone is logged on
@@ -365,23 +415,29 @@ def book(isbn):
             # get username if so and render
             user_name = session.get("username")
 
+            # get username/rating/review_text from the form
             username = escape(request.form.get("review_username"))
             rating = escape(request.form.get("rating"))
             review_text = escape(request.form.get("review"))
 
+            # abort if review user is not logged on user
             if user_name != username:
-
                 abort(403, "You can't submit a review which is not"
                       "under your name.")
 
+            # look in database if user review is already present of this user
             user_check = db.execute("SELECT * FROM reviews WHERE user_id=("
                                     "SELECT id FROM accounts WHERE username="
-                                    ":username)",
-                                    {"username": username}).fetchall()
+                                    ":username) and book_id=(SELECT id FROM "
+                                    "books WHERE isbn=:isbn)",
+                                    {"username": username,
+                                     "isbn": isbn}).fetchall()
 
+            # abort user tries to review more then once on the same book
             if len(user_check) != 0:
                 abort(403, "You can't review more than once.")
 
+            # add review to database
             db.execute("INSERT INTO reviews (user_id, rating, text, book_id) "
                        "VALUES ((SELECT id from accounts where "
                        "username=:username), :rating, :text, (SELECT id from "
@@ -389,15 +445,18 @@ def book(isbn):
                        {"username": username, "rating": rating,
                         "text": review_text, "isbn": isbn})
 
+            # update book after review has been submitted
             db.execute("UPDATE books SET (review_count, average_score)="
                        "(SELECT COUNT(*), AVG(rating) FROM reviews "
                        "WHERE book_id=(SELECT id FROM books WHERE isbn=:isbn))"
                        " WHERE isbn=:isbn", {"isbn": isbn})
 
+            # commit to database
             db.commit()
 
             return redirect(f"/{isbn}", 303)
 
+        # abort if not logged in
         abort(403)
 
     # abort using a 405 HTTPException
@@ -421,16 +480,21 @@ def api(isbn):
     # check if request is a "GET" request
     if request.method == "GET":
 
+        # get book with the isbn from the database
         books = db.execute("SELECT * FROM books WHERE isbn=:isbn",
                            {"isbn": isbn}).fetchall()
 
+        # if there are more than 1 book for the same isbn abort
         if len(books) > 1:
             abort(401)
+        # 404 abort if none are found
         elif len(books) == 0:
             abort(404)
 
+        # get first item in the books list (got list from database fetch)
         book = books[0]
 
+        # average_score must be a #.# type so used formatted string
         return jsonify(title=book.title, author=book.author, year=book.year,
                        isbn=book.isbn, review_count=book.review_count,
                        average_score=f"{book.average_score:.1f}")
@@ -452,9 +516,10 @@ def errorhandler(error):
         from UVA Mprog Programming 2 Module 10 - Web
     """
 
+    # get url list from session
     url_list = session.get("urls")
 
-    # split the error into the header and message
+    # split the error into the header and message (index, 0 header, 1 text)
     error_message = str(error).split(":")
 
     # check if someone is logged on
