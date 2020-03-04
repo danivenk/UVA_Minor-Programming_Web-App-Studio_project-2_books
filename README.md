@@ -60,4 +60,3 @@ requirements.txt:
 
 remarks:
   * don't know if I have to add the security module in functions directory to requirements.txt so I have not done that.
-  * please wait for the page to fully load when submitting a review or when registering. Else it'll mess up the database. This means please no double submit on the register and review forms...

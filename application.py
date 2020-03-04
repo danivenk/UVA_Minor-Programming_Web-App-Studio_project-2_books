@@ -37,6 +37,7 @@ if not os.getenv("DATABASE_URL"):
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+# app.run(threaded=True)
 
 # Set up database
 engine = create_engine(os.getenv("DATABASE_URL"))
@@ -132,6 +133,7 @@ def register():
     register a new user
 
     aborts if:
+        - a user is already registering (403)
         - no username/password/retype password is given (400)
         - user already registered (400)
         - request is anything else than "POST" or "GET" (405)
@@ -146,6 +148,13 @@ def register():
 
     # check if request was a "POST" request
     if request.method == "POST":
+
+        # check if user is already registering if so abort 403
+        if session.get("register_user") is not None:
+
+            # remove registering user from session
+            session.pop("register_user", None)
+            abort(403, "Detected double submission of form please try again")
 
         # get all values from the submitted form
         username = escape(request.form.get("register_username"))
@@ -162,6 +171,8 @@ def register():
 
             # abort using a 400 HTTPException
             abort(400, "No username/password specified")
+
+        session["register_user"] = username
 
         # search database for user
         user = db.execute("SELECT * FROM accounts "
@@ -182,6 +193,9 @@ def register():
                    "VALUES (:username, :password)",
                    {"username": username, "password": password})
         db.commit()
+
+        # remove registering user from session
+        session.pop("register_user", None)
 
         return redirect("/", 303)
 
@@ -219,7 +233,7 @@ def login():
         password = escape(request.form.get("password"))
 
         # find user in database
-        user = db.execute("SELECT password FROM accounts "
+        user = db.execute("SELECT password, username FROM accounts "
                           "WHERE username=:username",
                           {"username": username}).fetchall()
 
@@ -231,9 +245,8 @@ def login():
 
         # check if the username returns more or less 1 user in database
         if len(user) != 1:
-
             # abort using a 401 HTTPException
-            abort(401, "Login failed")
+            abort(401, "Multiple/No entries of the same user found, try again")
             return redirect("/", 303)
 
         # check if the given password matches the one from the databes
@@ -245,7 +258,8 @@ def login():
         else:
 
             # abort using a 401 HTTPException
-            abort(401, "Login failed")
+            abort(401, "Login failed, please check your login details "
+                  "and try again")
 
         return redirect("/search", code=303)
 
@@ -333,8 +347,7 @@ def search():
                         results.append(db_result)
 
         return render_template("search.html", login=True, user=user,
-                               urls=url_list, search_query=search_query,
-                               results=results)
+                               urls=url_list, results=results)
 
     # abort if not logged on
     elif not user:

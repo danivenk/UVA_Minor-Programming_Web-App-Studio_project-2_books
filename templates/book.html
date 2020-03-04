@@ -14,6 +14,7 @@
 
 <!-- content of the page -->
 {% block content %}
+    <!-- book details -->
     <h1>{{ book.title }}</h1>
     <div>Author: {{ book.author }}</div>
     <div>Year: {{ book.year }}</div>
@@ -32,6 +33,7 @@
     {% endif %}
     <hr>
     
+    <!-- list of reviews -->
     <div class="row">
         {% for review in reviews %}
             <div class="col-sm-6 card card-body">
