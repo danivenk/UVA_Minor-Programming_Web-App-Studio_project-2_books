@@ -14,6 +14,8 @@ static:
   * js:
     * javascript.js:
         checks all forms on the page and gives the validation
+  * img:
+      contians the icon of the webapp, [source][https://gamepedia.cursecdn.com/minecraft_gamepedia/f/f3/Book.png]
 
 templates:
   the html pages extend layout.html
