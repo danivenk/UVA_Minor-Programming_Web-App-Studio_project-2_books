@@ -338,9 +338,62 @@ def search():
     abort(405)
 
 
+def goodreads_api(url):
+    """
+    gets the average rating and review count from goodreads
+    when given the api url
+
+    parameters:
+        url - is the api url for goodreads
+
+    it returns a list with the avg rating and rating count
+    """
+
+    # if there can be made a connection to the goodreads api get te values
+    if requests.get(url).status_code == 200:
+
+        # get the goodreads api values
+        gr_data = requests.get(url)
+
+        # convert the json data to dictionary
+        data = json.loads(gr_data.text)
+
+        # get the average_rating and ratings_count
+        gr_ar = data["books"][0]["average_rating"]
+        gr_nor = data["books"][0]["ratings_count"]
+
+        # make a list with those values
+        goodreads = [gr_ar, gr_nor]
+
+        # if the rating or count is 0 give goodreads the value none instead
+        if gr_ar == "0.0" or gr_nor == 0:
+            goodreads = None
+
+    # if no connection could be made, give goodreads a null value
+    else:
+        goodreads = None
+
+    return goodreads
+
+
 @app.route("/<isbn>", methods=["GET", "POST"])
 def book(isbn):
+    """
+    renders a book page if "GET" request
+    adds review to database if "POST" request
 
+    aborts if:
+        - got more than 1 book for given isbn (401)
+        - found no books for given isbn (404)
+        - user tries to submit review under other name than logged on (403)
+        - not logged on (403)
+        - method not "GET" or "POST" (405)
+        - user tries to sumbit second review to book (403)
+
+    redirects to itself after submission of review
+    """
+
+    # get url list from the session
     url_list = session.get("urls")
 
     # check if someone is logged on
@@ -364,29 +417,7 @@ def book(isbn):
         URL = "https://www.goodreads.com/book/review_counts.json?key=" \
             f"4cWZI3ifMz0RSj1NFaYiBQ&isbns={isbn}"
 
-        # if there can be made a connection to the goodreads api get te values
-        if requests.get(URL).status_code == 200:
-
-            # get the goodreads api values
-            gr_data = requests.get(URL)
-
-            # convert the json data to dictionary
-            data = json.loads(gr_data.text)
-
-            # get the average_rating and ratings_count
-            gr_ar = data["books"][0]["average_rating"]
-            gr_nor = data["books"][0]["ratings_count"]
-
-            # make a list with those values
-            goodreads = [gr_ar, gr_nor]
-
-            # if the rating or count is 0 give goodreads the value none instead
-            if gr_ar == "0.0" or gr_nor == 0:
-                goodreads = None
-
-        # if no connection could be made, give goodreads a null value
-        else:
-            goodreads = None
+        goodreads = goodreads_api(URL)
 
         # if there are more than 1 book for the same isbn abort
         if len(books) > 1:
@@ -402,61 +433,52 @@ def book(isbn):
                                users=users, login=True, user=user,
                                urls=url_list, goodreads=goodreads)
 
+    # check if request is a "POST" request
+    elif request.method == "POST" and user:
+
+        # get username/rating/review_text from the form
+        username = escape(request.form.get("review_username"))
+        rating = escape(request.form.get("rating"))
+        review_text = escape(request.form.get("review"))
+
+        # abort if review user is not logged on user
+        if user != username:
+            abort(403, "You can't submit a review which is not"
+                  "under your name.")
+
+        # look in database if user review is already present of this user
+        user_check = db.execute("SELECT * FROM reviews WHERE user_id=("
+                                "SELECT id FROM accounts WHERE username="
+                                ":username) and book_id=(SELECT id FROM "
+                                "books WHERE isbn=:isbn)",
+                                {"username": username,
+                                 "isbn": isbn}).fetchall()
+
+        # abort user tries to review more then once on the same book
+        if len(user_check) != 0:
+            abort(403, "You can't review more than once.")
+
+        # add review to database
+        db.execute("INSERT INTO reviews (user_id, rating, text, book_id) "
+                   "VALUES ((SELECT id from accounts where "
+                   "username=:username), :rating, :text, (SELECT id from "
+                   "books where isbn=:isbn))",
+                   {"username": username, "rating": rating,
+                    "text": review_text, "isbn": isbn})
+
+        # update book after review has been submitted
+        db.execute("UPDATE books SET (review_count, average_score)="
+                   "(SELECT COUNT(*), AVG(rating) FROM reviews "
+                   "WHERE book_id=(SELECT id FROM books WHERE isbn=:isbn))"
+                   " WHERE isbn=:isbn", {"isbn": isbn})
+
+        # commit to database
+        db.commit()
+
+        return redirect(f"/{isbn}", 303)
+
     # if not logged on abort
     elif not user:
-        abort(403)
-
-    # check if request is a "POST" request
-    elif request.method == "POST":
-
-        # check if someone is logged on
-        if "username" in session:
-
-            # get username if so and render
-            user_name = session.get("username")
-
-            # get username/rating/review_text from the form
-            username = escape(request.form.get("review_username"))
-            rating = escape(request.form.get("rating"))
-            review_text = escape(request.form.get("review"))
-
-            # abort if review user is not logged on user
-            if user_name != username:
-                abort(403, "You can't submit a review which is not"
-                      "under your name.")
-
-            # look in database if user review is already present of this user
-            user_check = db.execute("SELECT * FROM reviews WHERE user_id=("
-                                    "SELECT id FROM accounts WHERE username="
-                                    ":username) and book_id=(SELECT id FROM "
-                                    "books WHERE isbn=:isbn)",
-                                    {"username": username,
-                                     "isbn": isbn}).fetchall()
-
-            # abort user tries to review more then once on the same book
-            if len(user_check) != 0:
-                abort(403, "You can't review more than once.")
-
-            # add review to database
-            db.execute("INSERT INTO reviews (user_id, rating, text, book_id) "
-                       "VALUES ((SELECT id from accounts where "
-                       "username=:username), :rating, :text, (SELECT id from "
-                       "books where isbn=:isbn))",
-                       {"username": username, "rating": rating,
-                        "text": review_text, "isbn": isbn})
-
-            # update book after review has been submitted
-            db.execute("UPDATE books SET (review_count, average_score)="
-                       "(SELECT COUNT(*), AVG(rating) FROM reviews "
-                       "WHERE book_id=(SELECT id FROM books WHERE isbn=:isbn))"
-                       " WHERE isbn=:isbn", {"isbn": isbn})
-
-            # commit to database
-            db.commit()
-
-            return redirect(f"/{isbn}", 303)
-
-        # abort if not logged in
         abort(403)
 
     # abort using a 405 HTTPException

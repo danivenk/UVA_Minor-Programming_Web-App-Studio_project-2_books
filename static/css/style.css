@@ -75,11 +75,6 @@ footer {
   width: 100%; }
 
 /* error page */
-.error img {
-  float: right;
-  position: relative;
-  height: 80%; }
-
 /* mobile style changes */
 @media screen and (max-device-width: 768px) {
   #container {

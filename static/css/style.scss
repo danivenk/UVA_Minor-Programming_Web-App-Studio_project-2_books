@@ -127,12 +127,6 @@ $main-color: #E06;
     /* error page */
     .error {
         @extend %alignment;
-
-        img {
-            float: right;
-            position: relative;
-            height: 80%;
-        }
     }
 
 /* mobile style changes */

@@ -18,7 +18,7 @@
     <!-- register form, enter username/password and retype password -->
     <form action="{{ url_for('search') }}" method="get" novalidate>
         <div class="form-row col-sm-12">
-            {% if search_query == None %}
+            {% if search_query %}
                 <input type="search" class="form-control col-md-11 col-8" name="search" id="search" placeholder="write your search query" value="{{ search_query }}">
             {% else %}
                 <input type="search" class="form-control col-md-11 col-8" name="search" id="search" placeholder="write your search query">
