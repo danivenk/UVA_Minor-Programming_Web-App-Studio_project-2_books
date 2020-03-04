@@ -104,6 +104,7 @@ def index():
     returns the homepage with parameters if logged on
     """
 
+    # get user list from session
     url_list = session.get("urls")
 
     # check if someone is logged on
@@ -111,14 +112,15 @@ def index():
 
         # get username if so and render
         user = session.get("username")
+    else:
+        user = None
 
     # check if request is a "GET" request
-    if request.method == "GET":
-        if user:
-            return render_template("index.html", login=True, user=user,
-                                   urls=url_list)
-        else:
-            return render_template("index.html", urls=url_list)
+    if request.method == "GET" and user:
+        return render_template("index.html", login=True, user=user,
+                               urls=url_list)
+    elif request.method == "GET":
+        return render_template("index.html", urls=url_list)
 
     # abort using a 405 HTTPException
     abort(405)
@@ -139,9 +141,10 @@ def register():
         was successfull it redirects (303) to "/".
     """
 
+    # get url list from session
     url_list = session.get("urls")
 
-    # check if request was a "POST" or a "GET" request
+    # check if request was a "POST" request
     if request.method == "POST":
 
         # get all values from the submitted form
@@ -182,6 +185,7 @@ def register():
 
         return redirect("/", 303)
 
+    # check if request was a "GET" request
     elif request.method == "GET":
 
         return render_template("register.html", urls=url_list)
@@ -295,6 +299,8 @@ def search():
 
         # get username if so and render
         user = session.get("username")
+    else:
+        user = None
 
     # check if request is a "GET" request and if user is logged on
     if request.method == "GET" and user:
@@ -401,6 +407,8 @@ def book(isbn):
 
         # get username if so and render
         user = session.get("username")
+    else:
+        user = None
 
     # check if request is a "GET" request and user logged on
     if request.method == "GET" and user:
