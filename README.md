@@ -15,7 +15,7 @@ static:
     * javascript.js:
         checks all forms on the page and gives the validation
   * img:
-      contians the icon of the webapp, [source][minecraf wiki]
+      contians the icon of the webapp, [source][minecrafwiki]
 
 templates:
   the html pages extend layout.html
@@ -63,4 +63,4 @@ requirements.txt:
 remarks:
   * don't know if I have to add the security module in functions directory to requirements.txt so I have not done that.
 
-[minecraft wiki]: https://gamepedia.cursecdn.com/minecraft_gamepedia/f/f3/Book.png
+[minecraftwiki]: https://gamepedia.cursecdn.com/minecraft_gamepedia/f/f3/Book.png
