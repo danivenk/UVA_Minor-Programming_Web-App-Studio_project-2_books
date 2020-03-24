@@ -25,7 +25,7 @@ function init() {
                 };
 
                 // stop submission if not valid
-                if (item.value === "" || (1 > rating || rating > 5)) {
+                if (item.value === "" || ((1 > rating || rating > 5) && item.id == "rating")) {
                     event.preventDefault();
                     event.stopPropagation();
                 };

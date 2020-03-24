@@ -47,7 +47,7 @@ db = scoped_session(sessionmaker(bind=engine))
 app.secret_key = os.urandom(16)
 
 
-@app.before_first_request
+@app.before_request
 def setup_urls():
     """
     create a dictionary for the navbar items

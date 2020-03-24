@@ -23,25 +23,41 @@
         <p>{{ message }}</p>
     {% endif %}
 
-    <!-- register form, enter username/password and retype password -->
+    <!-- register form
+        from https://getbootstrap.com/docs/4.1/components/forms/ -->
     <form class="needs-validation" action="{{ url_for('register') }}" method="post" novalidate>
+
+        <!-- username form group -->
         <div class="form-group">
             <label for="register_username">Username: </label>
-            <input type="username" class="form-control" name="register_username" id="register_username" placeholder="Username" required>
+            <input type="username" class="form-control" name="register_username"
+                id="register_username" placeholder="Username" required>
+
+            <!-- feedback for input -->
             <div class="invalid-feedback">
                 Please enter a username.
             </div>
         </div>
+
+        <!-- password form group -->
         <div class="form-group">
             <label for="register_password">Password</label>
-            <input type="password" name="register_password" class="form-control" id="register_password" placeholder="Password" required>
+            <input type="password" name="register_password" class="form-control"
+                id="register_password" placeholder="Password" required>
+                
+            <!-- feedback for input -->
             <div class="invalid-feedback">
                 Please enter your password.
             </div>
         </div>
+
+        <!-- retype password group -->
         <div class="form-group">
             <label for="register_rpassword">Retype Password</label>
-            <input type="password" name="register_rpassword" class="form-control" id="register_rpassword" placeholder="Retype Password" required>
+            <input type="password" name="register_rpassword" class="form-control"
+                id="register_rpassword" placeholder="Retype Password" required>
+
+            <!-- feedback for input -->
             <div class="invalid-feedback">
                 Please enter your again password.
             </div>

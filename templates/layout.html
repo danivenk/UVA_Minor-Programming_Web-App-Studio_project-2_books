@@ -3,72 +3,128 @@
 <html lang="en-us">
 
 <head>
+
     <!-- declaration of the page title, charset -->
     <title>Project 2 - {% block title %}{% endblock %}</title>
     <meta charset="UTF-8">
 
     <!-- bootstrap inclusion -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
 
-    <!-- icon inclusion, source: https://gamepedia.cursecdn.com/minecraft_gamepedia/f/f3/Book.png -->
-    <link rel="icon" href="{{ url_for('static', filename='img/books_icon.png') }}">
+    <!-- icon inclusion,
+        source: https://gamepedia.cursecdn.com/minecraft_gamepedia/f/f3/Book.png -->
+    <link rel="icon"
+        href="{{ url_for('static', filename='img/books_icon.png') }}">
 
     <!-- style and js inclusion -->
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}"
+        rel="stylesheet">
     <script src="{{ url_for('static', filename='js/javascript.js') }}"></script>
 </head>
 
 <body>
+
     <!-- container of the page -->
     <div id="container">
 
         <!-- navbar -->
         <nav class="navbar navbar-light navbar-expand-lg" id="nav">
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarNavAltMarkup"
+                    aria-controls="navbarNavAltMarkup" aria-expanded="false"
+                    aria-label="Toggle navigation">
+
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav" id="nav_menu">
-                    <!-- show navbar items depending on if user is logged on or not -->
+
+                    <!-- show navbar items depending on if user is logged
+                        on or not -->
                     {% if login %}
+
+                        <!-- add all times when user is logged on -->
                         {% for item_key in urls %}
-                            <a class="nav-item nav-link" href="{{ url_for(item_key) }}">{{ urls[item_key][0] }}</a>
+                            <a class="nav-item nav-link"
+                                    href="{{ url_for(item_key) }}">
+                                {{ urls[item_key][0] }}
+                            </a>
                         {% endfor %}
-                        <!-- greet user and show login button if logged on -->
+
+                        <!-- greet user and show logout button if logged on -->
                         <div class="login">
-                            <div class="nav-item navbar-text">Hi there, {{ user }} |</div>
-                            <a class="nav-item nav-link" href="{{ url_for('logout') }}" role="button">Logout</a>
+                            <div class="nav-item navbar-text">
+                                Hi there, {{ user }} |
+                            </div>
+                            <a class="nav-item nav-link"
+                                    href="{{ url_for('logout') }}" role="button">
+                                Logout
+                            </a>
                         </div>
                     {% else %}
+
+                        <!-- show items which are not required to be logged on -->
                         {% for item_key in urls %}
                             {% if not urls[item_key][1] %}
-                                <a class="nav-item nav-link" href="{{ url_for(item_key) }}">{{ urls[item_key][0] }}</a>
+                                <a class="nav-item nav-link"
+                                        href="{{ url_for(item_key) }}">
+                                    {{ urls[item_key][0] }}
+                                </a>
                             {% endif %}
                         {% endfor %}
+
                         <!-- show login screen in dropdown if not logged in -->
-                        <a class="nav-item nav-link dropdown dropdown-toggle login" id="drop_link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Login</a>
+                        <a class="nav-item nav-link dropdown dropdown-toggle login"
+                                id="drop_link" data-toggle="dropdown" href="#"
+                                role="button" aria-haspopup="true"
+                                aria-expanded="false">
+                            Login
+                        </a>
+
+                        <!-- dropdown with login form -->
                         <div class="dropdown-menu login" id="drop_menu">
-                            <!-- login form -->
-                            <form class="needs-validation" action="{{ url_for('login') }}" method="post" novalidate>
+
+                            <!-- login form
+                                from: https://getbootstrap.com/docs/4.1/components/forms/-->
+                            <form class="needs-validation"
+                                    action="{{ url_for('login') }}"
+                                    method="post" novalidate>
+                                
+                                <!-- username form group -->
                                 <div class="form-group">
                                     <label for="username">Username: </label>
-                                    <input type="username" class="form-control" name="username" id="username" placeholder="Username" required>
+                                    <input type="username" class="form-control"
+                                        name="username" id="username"
+                                        placeholder="Username" required>
+
+                                    <!-- feedback for invalid field -->
                                     <div class="invalid-feedback">
                                         Please enter a username.
                                     </div>
                                 </div>
+
+                                <!-- password form group -->
                                 <div class="form-group">
                                     <label for="password">Password</label>
-                                    <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
+                                    <input type="password" name="password"
+                                        class="form-control" id="password"
+                                        placeholder="Password" required>
+
+                                    <!-- feedback for invalid field -->
                                     <div class="invalid-feedback">
                                         Please enter your password.
                                     </div>
                                 </div>
+
                                 <!-- register via this link -->
                                 <a href="{{ url_for('register') }}">Sign Up</a>
+
+                                <!-- log in button -->
                                 <button type="submit" class="btn btn-primary">Log In</button>
                             </form>
                         </div>

@@ -14,20 +14,29 @@
 
 <!-- content of the page -->
 {% block content %}
+
     <!-- book details -->
     <h1>{{ book.title }}</h1>
     <div>Author: {{ book.author }}</div>
     <div>Year: {{ book.year }}</div>
     <div>ISBN: {{ book.isbn }}</div>
+
+    <!-- check if a book average score is available -->
     {% if book.average_score %}
         <div>
-            Rating: {{ "%.1f" | format(book.average_score)  }} (rated by {{ book.review_count }} users)
+            Rating: {{ "%.1f" | format(book.average_score)  }}
+                (rated by {{ book.review_count }} users)
         </div>
     {% else %}
         <div>Rating: Not available</div>
     {% endif %}
+
+    <!-- check if a book average score is available on goodreads-->
     {% if goodreads %}
-        <div>GoodReads Rating: {{ goodreads[0] }} (rated by {{ goodreads[1] }} users)</div>
+        <div>
+            GoodReads Rating: {{ goodreads[0] }}
+                (rated by {{ goodreads[1] }} users)
+        </div>
     {% else %}
         <div>GoodReads Rating: Not available</div>
     {% endif %}
@@ -35,8 +44,10 @@
     
     <!-- list of reviews -->
     <div class="row">
+
         {% for review in reviews %}
             <div class="col-sm-6 card card-body">
+
                 {% set id = review.user_id | int - 1 %}
                 <h6 class="card-title">{{ users[id].username }}</h6>
                 <p class="card-text">
@@ -50,30 +61,53 @@
     <hr>
 
     <h4>Write a review here:</h4>
-    <!-- register form, enter username/password and retype password -->
-    <form class="needs-validation" action="{{ url_for('book', isbn=book.isbn) }}" method="post" novalidate>
+
+    <!-- review form
+        from: https://getbootstrap.com/docs/4.1/components/forms/ -->
+    <form class="needs-validation"
+            action="{{ url_for('book', isbn=book.isbn) }}" method="post"
+            novalidate>
         <div class="form-row col-sm-6">
+
+            <!-- username form group as confirmation of logged on user and review user -->
             <div class="form-group col-sm-10">
                 <label for="review_username">Username:</label>
-                <input type="username" class="form-control" name="review_username" id="review_username" placeholder="Username" required>
+                <input type="username" class="form-control"
+                    name="review_username" id="review_username"
+                    placeholder="Username" required>
+                
+                <!-- feedback for input -->
                 <div class="invalid-feedback">
                     Please enter a username.
                 </div>
             </div>
+
+            <!-- rating form group -->
             <div class="form-group col-sm-2">
                 <label for="rating">Rating:</label>
-                <input type="number" name="rating" class="form-control" id="rating" min="1" max="5" required>
+                <input type="number" name="rating" class="form-control"
+                    id="rating" min="1" max="5" required>
+                
+                <!-- feedback for input -->
                 <div class="invalid-feedback">
                     Please enter a rating between 1 and 5.
                 </div>
             </div>
+
+            <!-- review form group -->
             <div class="form-group col-sm-12">
                 <label for="review">Review:</label>
-                <textarea name="review" class="form-control" id="review" placeholder="Type here your review" rows="5" required></textarea>
+                <textarea name="review" class="form-control" id="review"
+                    placeholder="Type here your review" rows="5" required>
+                </textarea>
+
+                <!-- feedback for input -->
                 <div class="invalid-feedback">
                     Please write at least 1 word.
                 </div>
             </div>
+
+            <!-- submit button -->
             <button type="submit" class="btn btn-primary">Submit Review</button>
         </div>
     </form>
