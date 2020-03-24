@@ -15,11 +15,21 @@ function init() {
             
             // for each to be validated item validate
             for (const item of validation_items) {
-                if (item.value === "") {
+
+                // check for a number (rating)
+                if (parseInt(item.value)) {
+                    rating = parseInt(item.value);
+                }
+                else {
+                    rating = -100000;
+                };
+
+                // stop submission if not valid
+                if (item.value === "" || (1 > rating || rating > 5)) {
                     event.preventDefault();
                     event.stopPropagation();
-                }
-            }
+                };
+            };
 
             // give was-validated class to form if validation was completed
             form.className = "was-validated";

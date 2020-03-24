@@ -47,7 +47,7 @@ db = scoped_session(sessionmaker(bind=engine))
 app.secret_key = os.urandom(16)
 
 
-@app.before_request
+@app.before_first_request
 def setup_urls():
     """
     create a dictionary for the navbar items
@@ -466,6 +466,15 @@ def book(isbn):
         if user != username:
             abort(403, "You can't submit a review which is not"
                   "under your name.")
+
+        # check if rating is a number between 1 and 5
+        try:
+            rating_value = int(rating)
+
+            if 1 > rating_value or rating_value > 5:
+                abort(400, "Rating must be a number between 1 and 5")
+        except TypeError:
+            abort(400, "Rating must be a number")
 
         # look in database if user review is already present of this user
         user_check = db.execute("SELECT * FROM reviews WHERE user_id=("

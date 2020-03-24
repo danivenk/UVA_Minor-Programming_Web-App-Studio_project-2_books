@@ -20,8 +20,8 @@
     <div>Year: {{ book.year }}</div>
     <div>ISBN: {{ book.isbn }}</div>
     {% if book.average_score %}
-        <div>Rating: {{ "%.1f" | format(book.average_score)  }} (rated by {{ book.review_count }} users)
-
+        <div>
+            Rating: {{ "%.1f" | format(book.average_score)  }} (rated by {{ book.review_count }} users)
         </div>
     {% else %}
         <div>Rating: Not available</div>

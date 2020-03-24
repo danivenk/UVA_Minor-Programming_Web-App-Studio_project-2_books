@@ -17,6 +17,10 @@ import csv
 
 
 def main():
+    """
+    import the books.csv and create the accounts, books and review tables
+    """
+
     # set up database
     engine = create_engine(os.getenv("DATABASE_URL"))
     db = scoped_session(sessionmaker(bind=engine))
@@ -49,6 +53,9 @@ def main():
 
     # commit the database
     db.commit()
+
+    # close the books.csv
+    f.close()
 
 
 # execute the main function if the program is run
