@@ -35,6 +35,8 @@ templates:
 application.py:
   * setup_urls()
       setups all the url enpoints and titles for the navbar. It gets all "GET" registered routes from the app and filters the log/static/register/api/book endpoints out and defines the search for login only. Finally it adds the url_list to the session
+
+      ***REMARK:** I used the nav items this way because here I only need to add/remove stuff in the forbidden and login_req lists to get the correct items in the navbar. The TA told me it was maybe easier if I did it different but since there was not much time left I could leave it like this*
   * index()
       renders the homepage (depending on login status)
   * register()
@@ -45,6 +47,8 @@ application.py:
       logout if logged in, remove user from session
   * search()
       get user query (word for word), search in database and render result
+
+      ***REMARK:** The query will be split word for word*
   * goodreads_api()
       gets the average rating and review count from goodreads when given the api url
   * book()
@@ -63,6 +67,7 @@ requirements.txt:
 remarks:
   * don't know if I have to add the security module in functions directory to requirements.txt so I have not done that.
 
-Feedback Maarten Schröder:
-   * Enter before comments
-   * A little more enters between code
+Personal Touch:
+  * One place to update the navigation bar from and specify there what items to display when logged on or not, it uses the endpoints registered in the application
+  * The ability to search for multiple queries at the same time, for example when "Micheal Grant" is searched it queries "michael" and "grant"
+      it searches than for first "micheal" in authors or in isbn after moving on to the next query.
